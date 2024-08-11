@@ -20,11 +20,10 @@ export default function Home() {
     const userMessage = message.trim();
     setMessage('');
 
-    // Add the user message to the messages state
     setMessages((messages) => [
       ...messages,
       { role: 'user', content: userMessage },
-      { role: 'assistant', content: '' }, // Placeholder for the assistant's response
+      { role: 'assistant', content: '' },
     ]);
 
     try {
@@ -43,14 +42,12 @@ export default function Home() {
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
 
-      // Read and append the streaming response
       let assistantResponse = '';
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
         assistantResponse += decoder.decode(value, { stream: true });
 
-        // Update the last message with the current response
         setMessages((messages) => {
           const updatedMessages = [...messages];
           updatedMessages[updatedMessages.length - 1] = {
@@ -87,7 +84,7 @@ export default function Home() {
       justifyContent="center"
       alignItems="center"
       sx={{
-        backgroundImage: `url('/bot.jpeg')`, 
+        backgroundImage: 'url(/bot.jpg)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }}
@@ -99,6 +96,10 @@ export default function Home() {
         border="1px solid black"
         p={2}
         spacing={3}
+        sx={{
+          backgroundColor: 'rgba(255, 255, 255, 0.8)',
+          borderRadius: 2,
+        }}
       >
         <Stack
           direction={'column'}
