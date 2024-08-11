@@ -86,6 +86,11 @@ export default function Home() {
       flexDirection="column"
       justifyContent="center"
       alignItems="center"
+      sx={{
+        backgroundImage: `url('/bot.jpeg')`, 
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
     >
       <Stack
         direction={'column'}
