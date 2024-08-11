@@ -1,7 +1,7 @@
-'use client'
+'use client';
 
-import { Box, Button, Stack, TextField } from '@mui/material'
-import { useState } from 'react'
+import { Box, Button, Stack, TextField } from '@mui/material';
+import { useState } from 'react';
 
 export default function Home() {
   const [messages, setMessages] = useState([
@@ -9,9 +9,9 @@ export default function Home() {
       role: 'assistant',
       content: "Hi! I'm the Headstarter support assistant. How can I help you today?",
     },
-  ])
-  const [message, setMessage] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
+  ]);
+  const [message, setMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const sendMessage = async () => {
     if (!message.trim() || isLoading) return;
@@ -19,6 +19,26 @@ export default function Home() {
 
     const userMessage = message.trim();
     setMessage('');
+
+    // Check for specific names and respond accordingly
+    const lowercasedMessage = userMessage.toLowerCase();
+    if (
+      lowercasedMessage.includes('yousra') &&
+      lowercasedMessage.includes('fatema') &&
+      lowercasedMessage.includes('amninder')
+    ) {
+      setMessages((messages) => [
+        ...messages,
+        { role: 'user', content: userMessage },
+        {
+          role: 'assistant',
+          content:
+            'Yousra, Fatema, and Amninder are in a team, and together they have made this project highly professional and well-structured.',
+        },
+      ]);
+      setIsLoading(false);
+      return;
+    }
 
     setMessages((messages) => [
       ...messages,
@@ -61,7 +81,11 @@ export default function Home() {
       console.error('Error:', error);
       setMessages((messages) => [
         ...messages,
-        { role: 'assistant', content: "I'm sorry, but I encountered an error. Please try again later." },
+        {
+          role: 'assistant',
+          content:
+            "I'm sorry, but I encountered an error. Please try again later.",
+        },
       ]);
     } finally {
       setIsLoading(false);
