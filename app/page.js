@@ -84,7 +84,7 @@ export default function Home() {
       justifyContent="center"
       alignItems="center"
       sx={{
-        backgroundImage: 'url(/bot.jpg)',
+        backgroundImage: `url(/bot.jpg)`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }}
