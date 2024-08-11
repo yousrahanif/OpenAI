@@ -13,86 +13,70 @@ export default function Home() {
   const [message, setMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
-  const hardcodedResponses = {
-    hi: "Hello! How can I assist you today?",
-    hello: "Hello! How can I assist you today?",
-    help: "Sure! What do you need help with?",
-    bye: "Goodbye! Have a great day!",
-    default: "I'm not sure how to respond to that. Let me check...",
-  }
+  const sendMessage = async () => {
+    if (!message.trim() || isLoading) return;
+    setIsLoading(true);
 
-  const sendMessage = () => {
-    if (!message.trim()) return;  // Don't send empty messages
+    const userMessage = message.trim();
+    setMessage('');
 
-    const userMessage = message.toLowerCase().trim();
-    setMessage('')
-
-    const assistantResponse = hardcodedResponses[userMessage] || hardcodedResponses.default;
-
+    // Add the user message to the messages state
     setMessages((messages) => [
       ...messages,
       { role: 'user', content: userMessage },
-      { role: 'assistant', content: assistantResponse },
-    ])
-  }
+      { role: 'assistant', content: '' }, // Placeholder for the assistant's response
+    ]);
 
- 
-  // const sendMessage = async () => {
-  //   if (!message.trim() || isLoading) return; 
-  //   setIsLoading(true) // Don't send empty messages
-  
-  //   setMessage('')
-  //   setMessages((messages) => [
-  //     ...messages,
-  //     { role: 'user', content: message },
-  //     { role: 'assistant', content: '' },
-  //   ])
-  
-  //   try {
-  //     const response = await fetch('/api/chat', {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify([...messages, { role: 'user', content: message }]),
-  //     })
-  
-  //     if (!response.ok) {
-  //       throw new Error('Network response was not ok')
-  //     }
-  
-  //     const reader = response.body.getReader()
-  //     const decoder = new TextDecoder()
-  
-  //     while (true) {
-  //       const { done, value } = await reader.read()
-  //       if (done) break
-  //       const text = decoder.decode(value, { stream: true })
-  //       setMessages((messages) => {
-  //         let lastMessage = messages[messages.length - 1]
-  //         let otherMessages = messages.slice(0, messages.length - 1)
-  //         return [
-  //           ...otherMessages,
-  //           { ...lastMessage, content: lastMessage.content + text },
-  //         ]
-  //       })
-  //     }
-  //   } catch (error) {
-  //     console.error('Error:', error)
-  //     setMessages((messages) => [
-  //       ...messages,
-  //       { role: 'assistant', content: "I'm sorry, but I encountered an error. Please try again later." },
-  //     ])
-  //   }
-  //   setIsLoading(false)
-  
-  // }
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify([{ role: 'user', content: userMessage }]),
+      });
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+
+      // Read and append the streaming response
+      let assistantResponse = '';
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        assistantResponse += decoder.decode(value, { stream: true });
+
+        // Update the last message with the current response
+        setMessages((messages) => {
+          const updatedMessages = [...messages];
+          updatedMessages[updatedMessages.length - 1] = {
+            role: 'assistant',
+            content: assistantResponse,
+          };
+          return updatedMessages;
+        });
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      setMessages((messages) => [
+        ...messages,
+        { role: 'assistant', content: "I'm sorry, but I encountered an error. Please try again later." },
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleKeyPress = (event) => {
     if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault()
-      sendMessage()
+      event.preventDefault();
+      sendMessage();
     }
-  }
+  };
 
   return (
     <Box
@@ -147,12 +131,13 @@ export default function Home() {
             fullWidth
             value={message}
             onChange={(e) => setMessage(e.target.value)}
+            onKeyDown={handleKeyPress}
           />
-          <Button variant="contained" onClick={sendMessage}>
-            Send
+          <Button variant="contained" onClick={sendMessage} disabled={isLoading}>
+            {isLoading ? 'Sending...' : 'Send'}
           </Button>
         </Stack>
       </Stack>
     </Box>
-  )
+  );
 }
