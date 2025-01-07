@@ -34,5 +34,5 @@
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/yourusername/chat-openai.git
+git clone https://github.com/yourusername/chat-openai.git](https://github.com/yousrahanif/OpenAI.git
 cd chat-openai
